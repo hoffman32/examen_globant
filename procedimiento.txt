@@ -1,0 +1,13 @@
+Usuario:
+sudo su postgres
+
+service postgresql start
+
+Join a database: psql
+
+User: hoffman
+alter user hoffman with password 'Q1w2e3r4t5';
+password: Q1w2e3r4t5
+createdb globant_exam --owner hoffman
+db: globant_exam
+
