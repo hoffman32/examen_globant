@@ -4,10 +4,75 @@ sudo su postgres
 service postgresql start
 
 Join a database: psql
-
+CREATE USER hoffman WITH PASSWORD 'Q1w2e3r4t5';
 User: hoffman
 alter user hoffman with password 'Q1w2e3r4t5';
 password: Q1w2e3r4t5
-createdb globant_exam --owner hoffman
+CREATE DATABASE globant_exam;
+GRANT ALL PRIVILEGES ON DATABASE globant_exam to hoffman;
 db: globant_exam
+
+Cadena:
+psql -h 127.0.0.1 -p 5432 -U hoffman globant_exam
+
+vi /etc/postgresql/13/main/pg_hba.conf
+vi /etc/postgresql/13/main/postgresql.conf
+host de postgresql
+systemctl restart postgresql
+
+nmap -sS -O 127.0.0.1
+
+wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1EETspcs5JiotdMxmK32naqVcz3dS03Qy' -O 'hired_employees.csv'
+
+https://drive.google.com/file/d/1EETspcs5JiotdMxmK32naqVcz3dS03Qy/view?usp=sharing
+
+wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1Z_iMmyJsxiDvr5T0KW9pXBrtqz96BrBG' -O 'Departments.csv'
+
+https://drive.google.com/file/d/1Z_iMmyJsxiDvr5T0KW9pXBrtqz96BrBG/view?usp=sharing
+
+wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1806a7U-HTDSoIMycNOnw5ldC3Gud00li' -O 'jobs.csv'
+
+https://drive.google.com/file/d/1806a7U-HTDSoIMycNOnw5ldC3Gud00li/view?usp=sharing
+
+====================================================================
+psql -h 127.0.0.1 -p 5432 -U hoffman globant_exam
+
+create schema if not exists stakeholders authorization hoffman;
+
+create table stakeholders.hired_employees ( 
+  id serial not null, 
+  name varchar, 
+  datetime varchar, 
+  department_id int,
+  job_id int
+);
+
+create table stakeholders.departments ( 
+  id serial not null, 
+  department varchar  
+);
+
+create table stakeholders.jobs ( 
+  id serial not null, 
+  job varchar
+);
+
+
+copy stakeholders.hired_employees (id, name, datetime, department_id, job_id) from '/home/glbnt/csvs/hired_employees.csv' delimiter ',' NULL AS '' csv;
+
+copy stakeholders.departments (id, department) from '/home/glbnt/csvs/Departments.csv' delimiter ',' NULL AS '' csv;
+
+copy stakeholders.jobs (id, job) from '/home/glbnt/csvs/jobs.csv' delimiter ','NULL AS '' csv;
+
+
+
+
+
+
+
+
+
+
+
+
 
