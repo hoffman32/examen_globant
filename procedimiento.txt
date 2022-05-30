@@ -1,3 +1,10 @@
+Pasos de desarrollo:
+ctrl+shif+p en visualstudio
+terminal
+-->pip install virtualenv
+-->virtualenv "nombre de la carpeta del entorno virtual"
+
+
 Usuario:
 sudo su postgres
 
@@ -65,14 +72,141 @@ copy stakeholders.departments (id, department) from '/home/glbnt/csvs/Department
 copy stakeholders.jobs (id, job) from '/home/glbnt/csvs/jobs.csv' delimiter ','NULL AS '' csv;
 
 
+Flask
+export FLASK_APP=servidor_flask.py
+pip install psycopg2
+pip install flask
+export flask=/var/lib/postgresql/.local/bin
+
+/var/lib/postgresql/.local/bin/flask run
+
+
+Proceso:
+--> docker build -t flaskapp . construir imagen
+--> docker run -it flaskapp /bin/sh trabajar imagen en consola.
+
+--> pip freeze  ->  paquetes que necesita nuestra aplicacion.
+--> pip freeze > requirements.txt -> Crear archivo de requerimientos automaticamente.
+
+-->docker run -it --publish 7000:4000 flaskapp -> desplegar aplicacion exponiendo puertos de trabajo.
+-->docker run -it --publish 7000:4000 --detach flaskapp -> En segundo plano.
+
+-->docker stop d39e77fed945 -> Parar container con el containerID.
+
+-->docker container ls -> Listar contenedores.
+
+RUN:
+-->docker run -it -p 7000:4000 -p 5432:5432 flaskapp
+
+docker run -it -p 7000:4000 -p 5432:5432 flaskapp /bin/sh
+
+
+#RUN nmap -sS -O 127.0.0.1
+
+#CMD ["python","/home/glbnt/scripts/examen_globant/Scripts/servidor_flask.py"]
+
+
+
+##############################################
+service postgresql start
+
+python /home/glbnt/scripts/examen_globant/Scripts/servidor_flask.py
 
 
 
 
 
+Jsons:hired_employees
+
+{"hired_employees":[{"name":"Jorge Salazar",
+    "datetime":"2021-10-01T13:04:21Z",
+    "department_id":"34",
+    "jod_id":"52"},
+    {"name":"Angie Bejar",
+    "datetime":"2021-10-22T13:04:21Z",
+    "department_id":"33",
+    "job_id":"55"}]}
+
+select * from stakeholders.hired_employees where name = 'Angie Bejar';
 
 
 
+create table stakeholders.hired_employees ( 
+  id serial not null, 
+  name varchar, 
+  datetime varchar, 
+  department_id int,
+  job_id int
+);
+
+create table stakeholders.departments ( 
+  id serial not null, 
+  department varchar  
+);
+
+create table stakeholders.jobs ( 
+  id serial not null, 
+  job varchar
+);
+
+ntile(4) over (order by score)
+
+
+select department, job, case when cuartil = 1 then contador else 0 end as Q1, case when cuartil = 2 then contador else 0 end as Q2, case when cuartil = 3 then contador else 0 end as Q3, case when cuartil = 4 then contador else 0 end as Q4 from (select department, job, ntile(4) over (order by count(t1.id)) as cuartil, count(t1.id) as contador
+from stakeholders.hired_employees as t1
+inner join stakeholders.departments as t2
+on t1.department_id = t2.id
+inner join stakeholders.jobs as t3
+on t1.job_id = t3.id
+group by t3.job, t2.department
+order by t2.department , t3.job) as t4;
+
+
+select department, job, count(t1.id)
+from stakeholders.hired_employees as t1
+inner join stakeholders.departments as t2
+on t1.department_id = t2.id
+inner join stakeholders.jobs as t3
+on t1.job_id = t3.id
+group by t3.job, t2.department
+order by t2.department , t3.job;
+t3.id, t3.department, t3.cuenta_dep, sum(t3.cuenta_dep)
+
+
+
+#Encontrar suma total para el 2021
+select sum(cuenta_dep) as total from (
+select t2.id, t2.department, count(t1.id) as cuenta_dep
+from stakeholders.hired_employees as t1
+inner join stakeholders.departments as t2
+on t1.department_id = t2.id
+where to_timestamp(datetime, 'YYYY-MM-DDTHH:MI:SSZ') >= '2021-01-01 00:00:00' and to_timestamp(datetime, 'YYYY-MM-DDTHH:MI:SSZ') <= '2021-12-31 23:59:59'
+group by t2.department, t2.id) as t3;
+
+2021-11-07T02:48:42Z
+
+SELECT to_timestamp(datetime, 'YYYY-MM-DDTHH:MI:SSZ') from stakeholders.hired_employees limit 10;
+
+1670/12 = 139.16
+
+#Encontrar cuenta de departamentos del 2021
+select count(cuenta_dep) as total from (
+            select t2.id, t2.department, count(t1.id) as cuenta_dep
+            from stakeholders.hired_employees as t1
+            inner join stakeholders.departments as t2
+            on t1.department_id = t2.id
+            where to_timestamp(datetime, 'YYYY-MM-DDTHH:MI:SSZ') >= '2021-01-01 00:00:00' and to_timestamp(datetime, 'YYYY-MM-DDTHH:MI:SSZ') <= '2021-12-31 23:59:59'
+            group by t2.department, t2.id) as t3;
+
+##Tabla final con el promedio en el where
+select * from (
+select t2.id, t2.department, count(t1.id) as cuenta_dep
+from stakeholders.hired_employees as t1
+inner join stakeholders.departments as t2
+on t1.department_id = t2.id
+group by t2.department, t2.id) as t3
+where t3.cuenta_dep >= 139.16
+order by cuenta_dep DESC;
 
 
 
